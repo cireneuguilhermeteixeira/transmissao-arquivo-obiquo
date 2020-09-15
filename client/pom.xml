@@ -32,6 +32,16 @@
             <artifactId>xap-openspaces</artifactId>
             <version>15.5.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx</artifactId>
+            <version>11</version>
+            <type>pom</type>
+        </dependency>
+
+
     </dependencies>
 
 </project>
