@@ -25,6 +25,7 @@ public class ClientSideServer implements Runnable{
         this.server = server;
         this.clientSocket = clientSocket;
         try {
+
             clientOutput = new ObjectOutputStream(clientSocket.getOutputStream());
             clientInput = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
@@ -55,8 +56,8 @@ public class ClientSideServer implements Runnable{
         }
     }
 
-    private void gerenciaMensagem(MessageSocket msg){
-        Device device = new Device();
+    private void gerenciaMensagem(MessageSocket msg)  {
+        Device device;
         switch (msg.getTipo()){
             case "create_device":
                 device = (Device) msg.getConteudo();
@@ -87,11 +88,23 @@ public class ClientSideServer implements Runnable{
 
 
     private void sendStatus(){
-        ArrayList<Enviroment> enviromentSortedSet = spaceHandlerInstance.readEnviromentRegisteredList();
-        MessageSocket messageSocket = new MessageSocket();
-        messageSocket.setTipo("get_status");
-        messageSocket.setConteudo(enviromentSortedSet);
-        sendMessageToSocket(messageSocket);
+
+        try {
+            Thread.sleep(500);
+            ArrayList<Enviroment> enviromentSortedSet = spaceHandlerInstance.readEnviromentRegisteredList();
+            MessageSocket messageSocket = new MessageSocket();
+            messageSocket.setTipo("get_status");
+            messageSocket.setConteudo(enviromentSortedSet);
+            sendMessageToSocketToAllClient(messageSocket);
+
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    }
+
+
+    private void sendMessageToSocketToAllClient(MessageSocket messageSocket){
+        server.mandarMsgPraTodosClientes(messageSocket);
     }
 
 
@@ -107,7 +120,7 @@ public class ClientSideServer implements Runnable{
 
 
 
-    private void sendMessageToSocket(Object msg){
+    public void sendMessageToSocket(Object msg){
         try {
             clientOutput.writeObject(msg);
         } catch (IOException e) {

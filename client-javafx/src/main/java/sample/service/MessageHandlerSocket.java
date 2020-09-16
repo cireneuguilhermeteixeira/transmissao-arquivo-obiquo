@@ -1,6 +1,8 @@
 package sample.service;
 
+import sample.Controller;
 import sample.Models.Device;
+import sample.Models.Enviroment;
 import sample.Models.MessageFileToSend;
 import sample.Models.MessageSocket;
 
@@ -8,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class MessageHandlerSocket {
 
@@ -15,13 +18,14 @@ public class MessageHandlerSocket {
     private ObjectInputStream clientInput;
     private ObjectOutputStream clientOutput;
     private Boolean run  = true;
+    private Controller controller;
 
-    public MessageHandlerSocket(Socket clientSocket){
+    public MessageHandlerSocket(Socket clientSocket, Controller controller){
+        this.controller = controller;
         this.clientSocket = clientSocket;
         try {
             clientOutput = new ObjectOutputStream(clientSocket.getOutputStream());
             clientInput = new ObjectInputStream(clientSocket.getInputStream());
-
             listenSocket();
         } catch (IOException e) {
             e.printStackTrace();
@@ -37,7 +41,9 @@ public class MessageHandlerSocket {
                     MessageSocket msg = (MessageSocket)clientInput.readObject();
                     if(msg != null){
                         if(msg.getTipo().equalsIgnoreCase("get_status")){
-                            System.out.println("get_status");
+                            System.out.println("Obtendo status dispositivos.");
+                            controller.setEnviromentSortedSet((ArrayList<Enviroment>)msg.getConteudo());
+                            controller.updateDevicesInSpace();
 
                         }else if(msg.getTipo().equalsIgnoreCase("create_device")){
                             System.out.println("create_device");
@@ -64,7 +70,6 @@ public class MessageHandlerSocket {
             e.printStackTrace();
         }
     }
-
 
 
     public void createDevice(Device device){

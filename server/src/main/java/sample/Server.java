@@ -100,7 +100,6 @@ public class Server {
 
 
     public void onChangePositionReceived(Device deviceWithNewPosition){
-        System.out.println("Dispositivo "+deviceWithNewPosition.getName()+" está se movendo.");
 
         Device deviceWithOldPosition = deviceList.stream().filter(device -> device.getName().equals(device.getName()))
                 .findFirst().orElse(null);
@@ -110,6 +109,7 @@ public class Server {
           deviceWithNewPosition.getLocalization().getLatitude().equals(deviceWithOldPosition.getLocalization().getLatitude())){
             System.out.println("Dispositivo não se moveu");
         }else{
+            System.out.println("Dispositivo "+deviceWithNewPosition.getName()+" está se movendo.");
             handleDeviceInEnviroment( deviceWithNewPosition, false);
         }
 
@@ -117,34 +117,32 @@ public class Server {
 
 
     public void onConnectionSolicitationReceived(ConnectionSolicitation solicitation){
+        solicitation.getDevice().setName("dispositivo "+ (deviceList.size()+1));
+        solicitation.getDevice().setAddress("dispositivo "+ (deviceList.size()+1));
+
         System.out.println("Solicitacao de conexao recebida." +
                 "\n" + solicitation.getDevice().getName());
 
-        boolean isAccepted = false;
-
-        Device newDevice = deviceList.stream().filter(device -> device.getName().equals(device.getName()))
-                .findFirst().orElse(null);
-
-
-        if(newDevice != null){ // ja existe cliente conectado ao servidor com esse nome
-            System.out.println("Nome de dispositivo ja esta sendo usado");
-        }
-        else{
-            isAccepted = true;
-            System.out.println("Novo dispositivo " + solicitation.getDevice().getName() + " se registrando ao servidor");
-            handleDeviceInEnviroment(solicitation.getDevice(), true);
-        }
-
-        sendConnectionSolicitationResponse(solicitation.getDevice().getName(), isAccepted);
+        System.out.println("Novo dispositivo " + solicitation.getDevice().getName() + " se registrando ao servidor");
+        handleDeviceInEnviroment(solicitation.getDevice(), true);
+        sendConnectionSolicitationResponse(solicitation.getDevice().getName(), true);
     }
 
 
 
     private void handleDeviceInEnviroment(Device device, Boolean isNewDevice){
+        for (Device dev: deviceList){
+            if(device.getName().equalsIgnoreCase(dev.getName())){
+                deviceList.remove(dev);
+                break;
+            }
+        }
+
         if(isNewDevice){
             //Criando novo dispositivo
             if(enviromentRegister.getRegisteredEnviromentList().size()==0){
                 Enviroment enviroment = createDefaultEnviroment();
+                enviroment.setLocalization(device.getLocalization());
                 onEnviromentCreated(enviroment);
                 device.setMyEnviroment(enviroment);
                 registerDeviceInEnviroment(enviroment.getName(), device);
@@ -155,6 +153,7 @@ public class Server {
                     registerDeviceInEnviroment(deviceMostClose.getMyEnviroment().getName(), device);
                 }else{
                     Enviroment enviroment = createDefaultEnviroment();
+                    enviroment.setLocalization(device.getLocalization());
                     onEnviromentCreated(enviroment);
                     device.setMyEnviroment(enviroment);
                     registerDeviceInEnviroment(enviroment.getName(), device);
@@ -181,20 +180,23 @@ public class Server {
 
 
     private Device checkDeviceMostClose(Device device) {
-        Float shortestLatitude = 0.0f;
-        Float shortestLongitude = 0.0f;
+        Double shortestLatitude;
+        Double shortestLongitude;
+        Double hipotenusa;
+        Double hipotenusaAnterior = 9999999.9;
+
+
         Device deviceMostClose = device;
         for (Device dev : deviceList) {
 
-            if (!dev.getName().equalsIgnoreCase(device.getName()) && shortestLatitude == 0.0f && shortestLongitude == 0.0f) {
-                shortestLatitude = Math.abs(dev.getLocalization().getLatitude() - device.getLocalization().getLatitude());;
-                shortestLongitude = Math.abs(dev.getLocalization().getLongitude() - device.getLocalization().getLongitude());
-            }
-            if (!dev.getName().equalsIgnoreCase(device.getName()) && Math.abs(dev.getLocalization().getLatitude() - device.getLocalization().getLatitude()) < shortestLatitude
-                    && Math.abs(dev.getLocalization().getLongitude() - device.getLocalization().getLongitude()) < shortestLongitude) {
-                shortestLatitude = Math.abs(dev.getLocalization().getLatitude() - device.getLocalization().getLatitude());
-                shortestLongitude = Math.abs(dev.getLocalization().getLongitude() - device.getLocalization().getLongitude());
-                if(shortestLatitude< 100 && shortestLongitude<100){
+            shortestLatitude = Math.abs(dev.getLocalization().getLatitude() - device.getLocalization().getLatitude());
+            shortestLongitude = Math.abs(dev.getLocalization().getLongitude() - device.getLocalization().getLongitude());
+            hipotenusa = Math.sqrt((shortestLatitude*shortestLatitude) + (shortestLongitude*shortestLongitude));
+
+
+            if (!dev.getName().equalsIgnoreCase(device.getName()) && hipotenusa< hipotenusaAnterior) {
+                hipotenusaAnterior = hipotenusa;
+                if(hipotenusaAnterior< 200){
                     deviceMostClose = dev;
                 }
             }
@@ -241,10 +243,9 @@ public class Server {
         template.setName(enviromentName);
         applicationSpace.change(template, new ChangeSet().addToCollection("connectedDeviceList", device));
         updateEnviromentRegisterInSpace();
-        //applicationSpace.write(new ChatRoomInteraction(InteractionType.ENTER, roomName, device, true), 60000);
 
     }
-//
+
 
     private void removeDeviceFromEnviroment(String nomeAmbiente, Device device){
         System.out.println("Removendo dispositivo " + device.getName() + " do ambiente " + nomeAmbiente);
@@ -264,43 +265,6 @@ public class Server {
     }
 
 
-//
-//    void removeRoom(String roomName){
-//        System.out.println("Removendo sala " + roomName + " por inatividade apos"
-//                + TIME_MINUTES_TO_REMOVE_EMPTY_ROOM + " min");
-//
-//        ChatRoom template = new ChatRoom();
-//        template.setName(roomName);
-//
-//        applicationSpace.take(template); // removendo sala do espaco
-//
-//        ChatRoom room = chatRoomRegister.getRegisteredRoomList().stream()
-//                .filter(r -> r.getName().equals(roomName)).findFirst().orElse(null);
-//
-//        chatRoomRegister.getRegisteredRoomList().remove(room);
-//
-//        updateChatRoomRegisterInSpace();
-//    }
-//
-//    void onChatRoomInteractionCreated(ChatRoomInteraction interactionData){
-//        System.out.println("Nova interacao de usuario com sala reconhecida no espaco." +
-//                "\nUsuario: " + interactionData.getClient().getName() +
-//                "\nSala: " + interactionData.getRoomName() +
-//                "\nInteracao do tipo: " + (interactionData.getType().equals(InteractionType.ENTER)? "Entrar": "Sair"));
-//
-//        InteractionType type = interactionData.getType();
-//
-//        String roomName = interactionData.getRoomName();
-//        Client client = interactionData.getClient();
-//
-//        if(type.equals(InteractionType.ENTER)){ // usuario solicitou entrar em uma sala
-//            registerClientInRoom(roomName, client);
-//        }
-//        else{ // usuario solicitou sair de uma sala
-//            removeClientFromRoom(roomName, client);
-//        }
-//    }
-//
     public void onCloseConnectionSolicitationReceived(CloseConnectionSolicitation solicitation){
         System.out.println("Dispositivo de id " + solicitation.getDeviceId() + " se desconectou");
 

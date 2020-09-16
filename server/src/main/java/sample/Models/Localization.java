@@ -6,31 +6,31 @@ import java.io.Serializable;
 
 @SpaceClass
 public class Localization implements Serializable {
-    private Float latitude;
-    private Float longitude;
+    private Double latitude;
+    private Double longitude;
 
     public Localization(){
     }
 
 
-    public Localization(Float latitude, Float longitude){
+    public Localization(Double latitude, Double longitude){
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public Float getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public Float getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLatitude(Float latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public void setLongitude(Float longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 }

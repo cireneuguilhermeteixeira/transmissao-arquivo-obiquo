@@ -10,11 +10,17 @@ import java.util.ArrayList;
 public class Enviroment implements Serializable, Comparable<Enviroment>{
 
     private String name;
+    private Localization localization;
     private ArrayList<Device> connectedDeviceList;
 
     @SpaceId(autoGenerate = true)
     public String getName() {
         return name;
+    }
+
+
+    public Localization getLocalization() {
+        return localization;
     }
 
     public void setName(String name) {
@@ -34,4 +40,7 @@ public class Enviroment implements Serializable, Comparable<Enviroment>{
         return this.name.compareTo(c.getName());
     }
 
+    public void setLocalization(Localization localization) {
+        this.localization = localization;
+    }
 }

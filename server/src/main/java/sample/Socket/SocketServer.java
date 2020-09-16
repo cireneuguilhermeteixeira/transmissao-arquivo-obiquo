@@ -1,6 +1,7 @@
 package sample.Socket;
 
 import sample.Models.Device;
+import sample.Models.MessageSocket;
 import sample.Socket.ClientSideServer;
 
 import java.io.IOException;
@@ -47,6 +48,7 @@ public class SocketServer {
                     System.out.println("Nova conexao recebida: " + client.getInetAddress().getHostAddress());
                     ClientSideServer clientSideServer = new ClientSideServer(this, client);
                     Future task = pool.submit(clientSideServer);
+
                     clientHandlerTaskMap.put(clientSideServer, task);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -55,8 +57,14 @@ public class SocketServer {
         }).start();
     }
 
-    void pararLadoCliente(ClientSideServer clientSideServer){
 
+    void mandarMsgPraTodosClientes(MessageSocket messageSocket){
+        clientHandlerTaskMap.forEach((clientSideServer, future) -> {
+            clientSideServer.sendMessageToSocket(messageSocket);
+        });
+    }
+
+    void pararLadoCliente(ClientSideServer clientSideServer){
         System.out.println("Parando tarefa para o socket do dispositivo ");
         Future clientHandlerTask = clientHandlerTaskMap.get(clientSideServer);
         clientHandlerTask.cancel(true);
