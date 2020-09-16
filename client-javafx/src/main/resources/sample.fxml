@@ -22,7 +22,7 @@
                   <Label fx:id="labelEnviroment" layoutX="128.0" layoutY="83.0" prefHeight="17.0" prefWidth="72.0" text="" />
                </children>
             </Pane>
-            <Label fx:id="descriptionDevice" layoutX="37.0" layoutY="555.0" prefHeight="17.0" prefWidth="237.0" text="" textFill="WHITE" />
+            <Label fx:id="descriptionDevice" layoutX="37.0" layoutY="555.0" prefHeight="17.0" prefWidth="270.0" text="" textFill="WHITE" />
          </children></AnchorPane>
    </children>
    <columnConstraints>

@@ -56,27 +56,7 @@ public class SpaceHandler {
     }
 
 
-    public void writeCloseConnectionSolicitation(String userName, String currentInRoomName){
-        CloseConnectionSolicitation solicitation = new CloseConnectionSolicitation(userName, currentInRoomName);
-        applicationSpace.write(solicitation);
-    }
 
-
-    public void writeEnviroment(String enviromentName) throws EntryAlreadyInSpaceException {
-        System.out.println("Escrevendo sala de nome " + enviromentName + " no espaco");
-
-        Enviroment enviroment = new Enviroment();
-        enviroment.setName(enviromentName);
-        enviroment.setConnectedDeviceList(new ArrayList<>());
-
-        try {
-            applicationSpace.write(enviroment, WriteModifiers.WRITE_ONLY);
-            System.out.println("Ambiente criado: " + enviroment);
-        }
-        catch (Exception e){
-            throw new EntryAlreadyInSpaceException("Erro", "Ja existe um ambiente com o nome " + enviromentName + " no espaco");
-        }
-    }
 
 
     public ArrayList<Enviroment> readEnviromentRegisteredList(){

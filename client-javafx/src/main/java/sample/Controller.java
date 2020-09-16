@@ -59,6 +59,7 @@ public class Controller {
                 }
             }else{
                 if(isEnabledToMoveDevice && localization !=null){
+                    descriptionDevice.setText("");
                     Circle newCircle = new Circle(event.getSceneX(),event.getSceneY(),10);
                     changePositionDevice(localization, new Localization(newCircle.getCenterX(),newCircle.getCenterY()));
                 }
@@ -100,6 +101,8 @@ public class Controller {
         labelCreateDevice.setText("Habilitado");
         labelMoveDevice.setText("");
         labelEnviroment.setText("");
+
+        descriptionDevice.setText("");
         localization = null;
 
     }
@@ -111,6 +114,8 @@ public class Controller {
         labelCreateDevice.setText("");
         labelMoveDevice.setText("Habilitado");
         labelEnviroment.setText("");
+
+        descriptionDevice.setText("");
         localization = null;
     }
 
@@ -121,6 +126,8 @@ public class Controller {
         labelCreateDevice.setText("");
         labelMoveDevice.setText("");
         labelEnviroment.setText("Habilitado");
+
+        descriptionDevice.setText("");
         localization = null;
         toColorRed();
 
@@ -162,6 +169,7 @@ public class Controller {
         circle.addEventHandler(MOUSE_PRESSED, event -> {
             if (event.getButton().equals(PRIMARY)) {
                 if(isEnabledToMoveDevice){
+                    descriptionDevice.setText("Selecione a posição de destino com botão direito.");
                     circle.setFill(Paint.valueOf("green"));
                     circleArrayList.add(circle);
                     if(localization ==null){
